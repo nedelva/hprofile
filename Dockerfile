@@ -8,8 +8,6 @@ WORKDIR /app
 # Copy Maven descriptor first to leverage Docker cache
 COPY pom.xml .
 
-# Download dependencies
-RUN mvn -B dependency:go-offline
 
 # Copy the rest of the project
 COPY . .
