@@ -1,13 +1,35 @@
-FROM openjdk:11 AS BUILD_IMAGE
-RUN apt update && apt install maven -y
-COPY ./ vprofile-project
-RUN cd vprofile-project &&  mvn install 
+# -----------------------------
+# Build stage
+# -----------------------------
+FROM maven:3.9.11-eclipse-temurin-11 AS build
 
-FROM tomcat:9-jre11
-LABEL "Project"="Vprofile"
-LABEL "Author"="Imran"
+WORKDIR /app
+
+# Copy Maven descriptor first to leverage Docker cache
+COPY pom.xml .
+
+# Download dependencies
+RUN mvn -B dependency:go-offline
+
+# Copy the rest of the project
+COPY . .
+
+# Build the application
+RUN mvn -B clean package -DskipTests
+
+# -----------------------------
+# Runtime stage
+# -----------------------------
+FROM tomcat:9.0-jre11-temurin
+
+LABEL project="Vprofile"
+LABEL author="Imran"
+
 RUN rm -rf /usr/local/tomcat/webapps/*
-COPY --from=BUILD_IMAGE vprofile-project/target/vprofile-v2.war /usr/local/tomcat/webapps/ROOT.war
+
+COPY --from=build \
+    /app/target/vprofile-v2.war \
+    /usr/local/tomcat/webapps/ROOT.war
 
 EXPOSE 8080
 CMD ["catalina.sh", "run"]
