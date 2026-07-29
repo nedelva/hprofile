@@ -1,7 +1,7 @@
 # -----------------------------
 # Build stage
 # -----------------------------
-FROM maven:3.9.11-eclipse-temurin-11 AS build
+FROM maven:3.9.11-eclipse-temurin-17 AS build
 
 WORKDIR /app
 
@@ -18,7 +18,7 @@ RUN mvn -B clean package -DskipTests
 # -----------------------------
 # Runtime stage
 # -----------------------------
-FROM tomcat:9.0-jre11-temurin
+FROM tomcat:9.0-jre17-temurin
 
 LABEL project="Vprofile"
 LABEL author="Imran"
